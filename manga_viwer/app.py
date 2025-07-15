@@ -134,7 +134,7 @@ def download_file(url, save_path):
 # ヘルパー関数: ZIPファイルの解凍と画像処理
 def extract_zip(archive_path, extract_to):
     """
-    ZIP/CBZファイルを解凍し、画像をWebP形式に変換して保存する。
+    ZIP/CBZファイルを解凍し、画像をPNG形式に変換して保存する。
     """
     os.makedirs(extract_to, exist_ok=True)
     try:
@@ -168,7 +168,7 @@ def extract_zip(archive_path, extract_to):
 # ヘルパー関数: RARファイルの解凍と画像処理
 def extract_rar(archive_path, extract_to):
     """
-    RAR/CBRファイルをunrarコマンドを使用して解凍し、画像をWebP形式に変換して保存する。
+    RAR/CBRファイルをunrarコマンドを使用して解凍し、画像をPNG形式に変換して保存する。
     """
     temp_dir = os.path.join(MANGA_CACHE_TEMP_DIR, os.path.basename(archive_path) + '_temp')
     os.makedirs(temp_dir, exist_ok=True)
