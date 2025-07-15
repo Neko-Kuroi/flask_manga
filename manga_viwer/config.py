@@ -21,8 +21,8 @@ FLASK_SECRET_KEY = 'your_super_secret_and_complex_key_here_please_change'
 
 # 外部からのダウンロードを許可するドメインのホワイトリスト
 # 例: ALLOWED_DOMAINS = ['example.com', 'trusted-site.com']
-# 空のリストにすると、外部からのダウンロードは許可されません。
-ALLOWED_DOMAINS = ['example.com', 'trusted-site.com']
+# 空のリストにすると、どのドメインからでもダウンロードを許可します（セキュリティリスクを理解した上で使用してください）。
+ALLOWED_DOMAINS = []
 
 # ダウンロードするファイルの最大サイズ（MB） - DoS攻撃対策
 MAX_DOWNLOAD_SIZE_MB = 500 # 500MB

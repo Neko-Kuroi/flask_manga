@@ -300,12 +300,17 @@ def manage_cache_size(current_hash=None):
 @app.route('/')
 def index():
     """トップページ: マンガリストと追加フォームを表示する"""
+    # base64モジュールをテンプレートに渡す
+    return render_template('index.html', base64=base64)
+
+@app.route('/manga_list')
+def manga_list():
+    """マンガリストをHTMXリクエスト用に返す"""
     db = get_db()
     cur = db.cursor()
     cur.execute('SELECT * FROM mangas ORDER BY title')
     mangas = cur.fetchall()
-    # base64モジュールをテンプレートに渡す
-    return render_template('index.html', mangas=mangas, base64=base64)
+    return render_template('manga_list.html', mangas=mangas, base64=base64)
 
 @app.route('/add', methods=['POST'])
 def add_manga():
@@ -356,9 +361,7 @@ def add_manga():
         logging.error(f"マンガの追加中にデータベースエラーが発生しました: {e}", exc_info=True)
         return '<p class="text-red-600">マンガの追加中にエラーが発生しました。</p>'
 
-    cur.execute('SELECT * FROM mangas ORDER BY title')
-    mangas = cur.fetchall()
-    return render_template('manga_list.html', mangas=mangas, base64=base64) # base64を渡す
+    return '<p class="text-green-600">マンガが正常に追加されました。</p>'
 
 @app.route('/remove', methods=['POST'])
 def remove_manga():
