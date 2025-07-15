@@ -1,2 +1,4 @@
 manga_viwer/__pycache__/
 manga_viwer/manga.db
+manga_viwer/manga_cache/
+manga_viwer/manga_cache_temp/

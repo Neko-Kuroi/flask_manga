@@ -177,7 +177,7 @@ def extract_rar(archive_path, extract_to):
     try:
         # unrarコマンドの引数を厳密に制御し、シェルインジェクションを防ぐ
         # `subprocess.run`はデフォルトでシェルを使用しないため、安全
-        cmd = ['unrar', 'x', '-o-', archive_path, temp_dir] # -o- で上書きを避ける
+        cmd = ['unrar', 'x', '-o+', archive_path, temp_dir] # -o+ で常に上書き
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         logging.info(f"UnRARコマンド出力:\n{result.stdout}")
 
