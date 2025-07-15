@@ -1,10 +1,10 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
     {% for manga in mangas %}
     <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition duration-200">
-        <p class="font-bold text-lg text-gray-900 truncate mb-2" title="{{ manga[2] }}">{{ manga[2] }}</p>
+        <p class="font-bold text-lg text-gray-900 truncate mb-2" title="{{ manga.title }}">{{ manga.title }}</p>
         <div class="flex flex-col sm:flex-row gap-2 mt-3">
-            {# manga[3] はデータベースから取得したマンガのURLです。これをbase64エンコードしてURLセーフな形式にします #}
-            <a href="/read?url_b64={{ base64.b64encode(manga[3].encode()).decode().replace('+', '-').replace('/', '_').replace('=', '') }}" 
+            {# manga.url をbase64エンコードしてURLセーフな形式にします #}
+            <a href="/read?url_b64={{ base64.b64encode(manga.url.encode()).decode().replace('+', '-').replace('/', '_') }}"
                class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-md text-sm text-center transition duration-200 transform hover:scale-105 shadow-sm">
                 読む
             </a>
@@ -12,7 +12,7 @@
             <button hx-post="/remove"
                     hx-target="#manga-list"
                     hx-swap="innerHTML"
-                    hx-vals='{"url":"{{ manga[3] }}"}'
+                    hx-vals='{"url":"{{ manga.url }}"}'
                     hx-confirm="本当にこのマンガを削除しますか？"
                     class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-md text-sm text-center transition duration-200 transform hover:scale-105 shadow-sm">
                 削除

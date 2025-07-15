@@ -5,7 +5,7 @@ import base64
 import zipfile
 import subprocess
 import shutil
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 import requests
 from PIL import Image
 import glob
@@ -152,7 +152,7 @@ def extract_zip(archive_path, extract_to):
                         img = Image.open(f).convert('RGB')
                         img.thumbnail((1200, 1600)) # サムネイルサイズにリサイズ
                         # 連番でファイル名を生成し、元のファイル名を無視してセキュリティを向上
-                        img.save(os.path.join(extract_to, f'{i:04d}.webp'), 'WEBP', quality=80)
+                        img.save(os.path.join(extract_to, f'{i:04d}.png'), 'PNG')
                 except Exception as e:
                     logging.warning(f"画像処理エラー (ZIP): {name} - {e}", exc_info=True)
         logging.info(f"ZIP解凍と画像処理が完了しました: {archive_path} -> {extract_to}")
@@ -192,7 +192,7 @@ def extract_rar(archive_path, extract_to):
             try:
                 img = Image.open(path).convert('RGB')
                 img.thumbnail((1200, 1600))
-                img.save(os.path.join(extract_to, f'{i:04d}.webp'), 'WEBP', quality=80)
+                img.save(os.path.join(extract_to, f'{i:04d}.png'), 'PNG')
             except Exception as e:
                 logging.warning(f"画像処理エラー (RAR): {os.path.basename(path)} - {e}", exc_info=True)
         logging.info(f"RAR解凍と画像処理が完了しました: {archive_path} -> {extract_to}")
@@ -330,7 +330,7 @@ def add_manga():
     # werkzeug.utils.secure_filename を使用するのがより堅牢ですが、
     # ここでは basename と splitext で簡単なサニタイズを行います。
     # 完全にパストラバーサルを防ぐには、外部からのファイル名を信用しないことが重要です。
-    title_raw = os.path.splitext(os.path.basename(urlparse(url).path))[0]
+    title_raw = os.path.splitext(os.path.basename(unquote(urlparse(url).path)))[0]
     # タイトルからパス区切り文字や無効な文字を削除
     title = re.sub(r'[\\/:\*?"<>|]', '', title_raw)
     if not title: # タイトルが空になる場合に対応
@@ -469,7 +469,7 @@ def reader_data():
     manage_cache_size(manga_hash)
 
     # 抽出ディレクトリが存在しない、または画像が一つもない場合のみ処理
-    if not os.path.isdir(extract_path) or len(glob.glob(f'{extract_path}/*.webp')) == 0:
+    if not os.path.isdir(extract_path) or len(glob.glob(f'{extract_path}/*.png')) == 0:
         logging.info(f"マンガをダウンロード/抽出します: {title} (hash: {manga_hash})")
         try:
             download_file(url, archive_path)
@@ -496,7 +496,7 @@ def reader_data():
         logging.info(f"キャッシュからマンガをロードします: {title} (hash: {manga_hash})")
 
 
-    images = sorted(glob.glob(f'{extract_path}/*.webp'))
+    images = sorted(glob.glob(f'{extract_path}/*.png'))
     if not images:
         logging.error(f"抽出された画像が見つかりません: {extract_path}")
         # 画像がない場合、キャッシュをクリーンアップして再試行を促す
@@ -556,7 +556,7 @@ def serve_image(path):
     
     # MIMEタイプを適切に推測する (例: image/webp)
     # python-magicを使っていればより正確ですが、ここでは拡張子から推測
-    mime_type = "image/webp" # 現状はすべてwebpで保存されるため固定
+    mime_type = "image/png" # 現状はすべてpngで保存されるため固定
     
     return send_file(full_path, mimetype=mime_type)
 
