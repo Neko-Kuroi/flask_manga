@@ -242,3 +242,223 @@ unrar の存在チェック: extract_rar 関数内で unrar コマンドが存�
 セッションのセキュリティ: app.secret_key は非常に重要です。本番環境では、ハードコードせず、環境変数や安全な設定ファイルから読み込むようにすべきです。これは config.py のコメントで既に指摘されていますが、再確認です。
 
 詳細なMIMEタイプ推測: serve_image では現在 image/png に固定されていますが、mimetypes モジュールや python-magic などのライブラリを使用して、より正確にMIMEタイプを推測すると良いでしょう。
+
+---
+
+以下に、**Flask アプリ（Python）と Laravel アプリ（PHP 8.2）のマンガビューアー実装**について **比較・対比**して詳しく説明します。
+
+---
+
+## 🔍 比較表：Flask vs Laravel マンガビューアー
+
+| 項目 | Flask (Python) | Laravel (PHP) |
+|------|----------------|----------------|
+| 言語 | Python | PHP |
+| フレームワーク | Flask | Laravel 11 |
+| データベース | SQLite（デフォルト） | SQLite / MySQL / PostgreSQL |
+| テンプレートエンジン | Jinja2 | Blade |
+| セッション管理 | Flask の `session` | Laravel の `session()` |
+| ルーティング | 手動で定義（`@app.route`） | Laravel ルーター（`routes/web.php`） |
+| URL検証 | カスタム関数でドメインホワイトリストをチェック | URL検証なし（一部はセキュリティ強化版あり） |
+| ZIP解凍 | `zipfile` モジュール | PHP の `ZipArchive` |
+| RAR解凍 | `unrar` コマンド or `subprocess` | PHP の `ext-rar` or `exec('unrar')` |
+| 画像変換 | Pillow + WebP 変換 | Intervention Image + WebP 変換 |
+| キャッシュ管理 | LRU アルゴリズム（手書き） | 自動キャッシュ削除（サイズ制限付き） |
+| 動的読み込み | JavaScript + AJAX (`fetch`) | HTMX を使用した HTML 片方向非同期通信 |
+| フロントエンド | Tailwind CSS CDN + JavaScript | Tailwind CSS CDN + htmx.js |
+| キャッシュクリア機能 | `/clear_cache` API で全削除 | 同様の `/clear_cache` ルートで実装 |
+| セキュリティ | URL検証、パストラバーサル防止、ダウンロード制限 | セキュリティ強化された image メソッドなど |
+| インストール難易度 | pip install で簡易インストール | Composer + ext-rar などの拡張が必要 |
+| 環境設定 | `config.py` で設定ファイルを分離 | `.env` + マイグレーションで柔軟な設定 |
+| 開発速度 | Python 様々なライブラリで高速開発可能 | Laravel Eloquent ORM で効率的 |
+| パフォーマンス | 単純な構成で軽量 | Laravel のオーバーヘッドがあるが安定 |
+
+---
+
+## ✅ 共通点
+
+### 📁 1. 機能面での共通性
+- ZIP/CBZ/RAR 形式の漫画を URL からダウンロード
+- 解凍 → 画像変換（WebP） → キャッシュ保存
+- キャッシュ自動管理（LRU）
+- セッションで現在読んでいる漫画を保持
+- ページネーション方式で画像をロード（AJAX/HTMX）
+
+### 🖼️ 2. UI/UX
+- Tailwind CSS を利用したレスポンシブデザイン
+- 「もっと読み込む」ボタンによる画像の遅延読み込み
+- ローディングアニメーション表示
+- モバイルにも最適化
+
+### 🛡️ 3. セキュリティ対策
+- パストラバーサル攻撃防止（パスの正規化）
+- URL検証（許可ドメイン、プロトコル制限）
+- ダウンロードサイズ制限（DoS 対策）
+
+---
+
+## ⚙️ 技術的な違い
+
+| 項目 | Flask | Laravel |
+|------|--------|----------|
+| **テンプレート** | Jinja2（シンプルで柔軟） | Blade（Laravel 固有文法） |
+| **ルーティング** | `@app.route()` で直接記述 | `web.php` で集約され、コントローラーへ委譲 |
+| **画像処理** | Pillow（Python） | Intervention Image（PHP） |
+| **RARサポート** | `unrar` コマンド必須 | `ext-rar` 拡張 or `unrar` コマンド |
+| **非同期通信** | JavaScript + fetch API | HTMX（HTML 属性で非同期処理） |
+| **キャッシュ管理** | カスタム実装（手書き） | カスタム関数だが、Laravel スタイルで実装 |
+| **データベース** | SQLite（簡単で軽量） | SQLite / MySQL / PostgreSQL 可能 |
+| **ログ出力** | Python の logging モジュール | Laravel Logファサード or Monolog |
+| **セッション管理** | Flask の session（署名付きクッキー） | Laravel の session（サーバー側で管理） |
+| **依存管理** | pip で一括管理 | Composer で一括管理（`composer require intervention/image`） |
+| **キャッシュディレクトリ** | 手動で作成（`os.makedirs()`） | `php artisan storage:link` などで準備 |
+
+---
+
+## 🎯 選択の推奨ポイント
+
+| 用途 | 推奨フレームワーク | 理由 |
+|------|--------------------|------|
+| 小規模で速く立ち上げたい | Flask | 軽量で環境構築が容易 |
+| 本番運用や大規模アプリ | Laravel | 安定性、チーム開発向けの設計 |
+| システム管理者向け | Flask | Python が多くのサーバーで使われているため |
+| デザイナー向け | Laravel | Blade テンプレートは HTML に近い形で扱える |
+| 学習コストが低い | Flask | Python は初心者でも学びやすい |
+| 高機能・堅牢性重視 | Laravel | フレームワークとして成熟しており、Eloquent ORM、ミドルウェア、テスト支援なども豊富 |
+| オープンソース開発 | Laravel | PHP は WordPress などとの親和性高く、保守性が高い |
+
+---
+
+## 📦 ファイル構成比較
+
+### Flask:
+```
+manga_viewer/
+├── app.py
+├── config.py
+├── templates/
+│   ├── index.html
+│   ├── manga_list.html
+│   ├── reader.html
+│   └── reader_content.html
+├── manga.db
+├── manga_cache/
+└── manga_cache_temp/
+```
+
+### Laravel:
+```
+laravel_manga_uploader/
+├── routes/
+│   └── web.php
+├── app/
+│   └── Http/
+│       └── Controllers/
+│           └── MangaController.php
+├── database/
+│   └── migrations/
+│       └── create_mangas_table.php
+├── resources/
+│   └── views/
+│       ├── index.blade.php
+│       ├── _manga_list.blade.php
+│       ├── reader.blade.php
+│       └── _reader_content.blade.php
+├── storage/
+│   └── app/manga_cache/
+└── .env
+```
+
+---
+
+## 🧠 技術的特徴の違い
+
+### 🔁 非同期通信
+| 項目 | Flask | Laravel |
+|------|-------|---------|
+| 方法 | JavaScript `fetch()` | HTMX（HTML属性で非同期） |
+| 説明 | より柔軟な制御が可能 | シンプルで HTML 中心の開発が可能 |
+| 利点 | カスタマイズ性高 | 開発スピードアップ |
+| 欠点 | JS で書く必要あり | htmx.js への依存 |
+
+---
+
+### 🖼️ 画像処理
+| 項目 | Flask | Laravel |
+|------|-------|---------|
+| ライブラリ | Pillow（Python） | Intervention Image（PHP） |
+| 処理方法 | Python で画像処理 | PHP で画像処理 |
+| 利点 | Python による柔軟な拡張性 | Laravel と自然に統合される |
+| 欠点 | PHP との連携がない | PHP の画像処理はやや重め |
+
+---
+
+### 💾 キャッシュ管理
+| 項目 | Flask | Laravel |
+|------|-------|---------|
+| 方式 | 手動で LRU 実装 | カスタム関数で実装 |
+| 利点 | Python ならではの柔軟性 | Laravel のファイル操作が便利 |
+| 欠点 | マルチユーザーサポート弱め | セッションベースの管理 |
+
+---
+
+## 🧪 開発体験の違い
+
+| 項目 | Flask | Laravel |
+|------|-------|---------|
+| 学習曲線 | 平坦（特に Python 習熟者） | やや急（Laravel 独自構造） |
+| デバッグ | Python の print / logging | Laravel Telescope（デバッグツール） |
+| テスト | pytest, unittest | PHPUnit, Pest |
+| コミュニティ | 広範囲（AI、機械学習含む） | PHP エコシステム（WordPress系開発者層多し） |
+| IDEサポート | VS Code / PyCharm | PhpStorm / VS Code（Blade 対応） |
+
+---
+
+## 📈 性能比較（想定）
+
+| 項目 | Flask | Laravel |
+|------|-------|---------|
+| 起動速度 | 非常に軽量 | Laravel の起動オーバーヘッドあり |
+| リクエスト処理速度 | シンプルで高速 | フレームワークオーバーヘッドあり |
+| キャッシュ性能 | 同じ仕組みなので同等 | 同じ仕組みなので同等 |
+| メモリ消費 | 少なめ | やや多くなる傾向 |
+| 拡張性 | Python ならではの自由度 | Laravel ならではの豊富なパッケージ |
+
+---
+
+## 📦 運用・保守性
+
+| 項目 | Flask | Laravel |
+|------|-------|---------|
+| サーバー要件 | Python 3.8+ + pip | PHP 8.2+ + Composer |
+| ロギング | Python logging モジュール | Laravel Log（Monolog） |
+| エラー監視 | Sentry, Rollbar | Laravel Telescope |
+| CI/CD | GitHub Actions, Docker | Laravel Envoyer, Forge |
+| テスト | pytest, unittest | Pest, PHPUnit |
+| ドキュメンテーション | Python 生態系 | Laravel 公式ドキュメント充実 |
+| コミュニティ | Python 全般 | PHP Laravel 専門コミュニティ |
+
+---
+
+## ✅ 結論：どちらを選べば良いか？
+
+| 条件 | 推奨フレームワーク | 理由 |
+|------|--------------------|------|
+| Python が得意 | ✅ Flask | カスタマイズ性高め、軽量 |
+| PHP が得意 | ✅ Laravel | Laravel の生産性活用 |
+| 小規模・PoC | ✅ Flask | 簡潔で導入が早い |
+| 本番運用 | ✅ Laravel | Laravel は堅牢なフレームワーク |
+| 開発者のスキル | Python | Flask |
+| 開発者のスキル | PHP | Laravel |
+| チーム開発 | PHP + Laravel | Blade + Controller 分割で協業しやすい |
+| 新しい機能追加 | Python | Flask は柔軟な拡張性あり |
+| プラットフォームの選択肢 | Linux | Windows, Linux, macOS |
+
+---
+
+## 📥 最後に
+
+両方のアプリケーションは、**ZIP/CBZ/RAR形式の漫画をオンラインで閲覧できるマンガビューアー**として非常に優れた実装です。  
+それぞれに長所短所があり、選択は目的や技術スタックに大きく依存します。
+
+---
