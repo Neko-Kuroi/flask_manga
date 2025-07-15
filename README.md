@@ -247,6 +247,8 @@ unrar の存在チェック: extract_rar 関数内で unrar コマンドが存�
 
 以下に、**Flask アプリ（Python）と Laravel アプリ（PHP 8.2）のマンガビューアー実装**について **比較・対比**して詳しく説明します。
 
+Laravel アプリ（PHP 8.2）のマンガビューアー
+https://github.com/Neko-Kuroi/laravel_manga_reader-
 ---
 
 ## 🔍 比較表：Flask vs Laravel マンガビューアー
