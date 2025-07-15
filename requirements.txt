@@ -1,0 +1,8 @@
+Flask==2.2.5
+Pillow==9.2.0
+requests==2.28.1
+# Windowsユーザーの場合、以下の行をコメントアウト解除してください。
+# python-magic-bin==0.4.14
+# Linux/macOSユーザーの場合、以下の行をコメントアウト解除し、
+# さらにシステムにlibmagicをインストールしてください (例: sudo apt-get install libmagic1 または brew install libmagic)。
+# python-magic==0.4.27

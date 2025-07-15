@@ -1,0 +1,65 @@
+<div>
+    <p class="text-sm text-gray-600 mb-3 text-right">ページ <span id="loaded" class="font-semibold">0</span> / <span id="total" class="font-semibold">{{ total_pages }}</span></p>
+    
+    <div id="image-container" class="space-y-4 bg-gray-200 p-2 rounded-lg">
+        {# 画像はここに動的に追加されます #}
+    </div>
+    
+    <button id="load-more"
+            hx-get="/get_images"
+            hx-target="#image-container"
+            hx-swap="beforeend"
+            hx-include="#load-more"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 mt-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center htmx-indicator">
+        <span class="mr-2">▼ もっと読み込む</span>
+        <svg class="htmx-indicator animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </button>
+</div>
+
+<script>
+document.addEventListener('htmx:afterRequest', function(evt){
+    // /get_images へのGETリクエストが成功した場合のみ処理
+    if(evt.detail.verb === 'GET' && evt.detail.pathInfo.finalRequestPath.startsWith('/get_images')){
+        try {
+            const data = JSON.parse(evt.detail.xhr.responseText);
+            const container = document.getElementById('image-container');
+            
+            // 新しい画像をコンテナに追加
+            data.images.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.className = 'w-full h-auto rounded-md shadow-md'; // 画像のスタイル
+                img.loading = 'lazy'; // 遅延読み込みを有効にする
+                container.appendChild(img);
+            });
+            
+            // 読み込み済みページ数を更新
+            const loadedPages = data.current_offset + data.images.length;
+            document.getElementById('loaded').textContent = loadedPages;
+            
+            // 全てのページが読み込まれたかチェック
+            if(loadedPages >= data.total_pages){
+                document.getElementById('load-more').style.display='none'; // ボタンを非表示
+            } else {
+                // 次の読み込みのためのoffsetを更新
+                const nextOffset = loadedPages;
+                evt.detail.elt.setAttribute('hx-get', `/get_images?offset=${nextOffset}`);
+            }
+        } catch (e) {
+            console.error('HTMX afterRequest (get_images) エラー:', e);
+            // エラーメッセージをユーザーに表示するなどの処理を追加することもできます
+        }
+    }
+    // マンガリスト更新後の処理 (index.htmlからのトリガー)
+    if(evt.detail.successful && evt.detail.elt.id === 'manga-list' && evt.detail.pathInfo.finalRequestPath === '/add'){
+        // フォームをリセット
+        const addForm = document.querySelector('form[hx-post="/add"]');
+        if (addForm) {
+            addForm.reset();
+        }
+    }
+});
+</script>
